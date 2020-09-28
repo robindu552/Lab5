@@ -1,6 +1,7 @@
 ---
 title: "Lab 05 - Data Wrangling"
-output: html_document
+author: "Robin Du"
+output: github_document
 ---
 
 # Learning goals
