@@ -195,8 +195,14 @@ For each state, identify what is the station that is closest to the mid-point of
 met_stations <- unique(met[, .(USAFID, STATE, lon, lat)])
 
 met_stations[, .SD[1], by = USAFID]
-met_stations[, lat_mid := (max(lat) - min(lat))/2, by = STATE]
-met_stations[, lon_mid := (max(lon) - min(lon))/2, by = STATE]
+met_stations[, lat_mid := quantile(lat, probs = .5, na.rm = TRUE), by = STATE]
+met_stations[, lon_mid := quantile(lon, probs = .5, na.rm = TRUE), by = STATE]
+
+# Looking at the euclidean distances
+met_stations[, distance := sqrt((lat - lat_mid)^2 + (lon - lon_mid)^2)]
+met_stations[, minrecord := which.min(distance), by = STATE]
+met_stations[, n := 1:.N, by = STATE]
+met_stations[n == minrecord, .(USAFID, STATE, lon, lat)]
 ```
 
 Knit the doc and save it on GitHub.
