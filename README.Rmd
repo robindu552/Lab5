@@ -2,6 +2,7 @@
 title: "Lab 05 - Data Wrangling"
 author: "Robin Du"
 output: github_document
+always_allow_html: true
 ---
 
 # Learning goals
@@ -171,7 +172,7 @@ met_stations[, wind.sp50s   := quantile(wind.sp, probs = .5, na.rm = TRUE), by =
 # Temperature
 met_stations[, tempdif  := which.min(abs(temp - temp50s)), by = STATE]
 met_stations[, recordid := 1:.N, by = STATE]
-met_stations[recordid == tempdif, .(USAFID, temp, temp50s, STATE)]
+met_temp <- met_stations[recordid == tempdif, .(USAFID, temp, temp50s, STATE)]
 
 # Atmospheric pressure
 met_stations[, atm.pressdif  := which.min(abs(atm.press - atm.press50s)), by = STATE]
@@ -202,8 +203,44 @@ met_stations[, lon_mid := quantile(lon, probs = .5, na.rm = TRUE), by = STATE]
 met_stations[, distance := sqrt((lat - lat_mid)^2 + (lon - lon_mid)^2)]
 met_stations[, minrecord := which.min(distance), by = STATE]
 met_stations[, n := 1:.N, by = STATE]
-met_stations[n == minrecord, .(USAFID, STATE, lon, lat)]
+met_location <- met_stations[n == minrecord, .(USAFID, STATE, lon, lat)]
 ```
+
+
+```{r question3-merging-lat-lon}
+all_stations <- met[, .(USAFID, lat, lon, STATE)][, .SD[1], by = "USAFID"]
+
+# Recovering lon and lat from the original dataset
+met_temp <- merge(
+  x = met_temp,
+  y = all_stations,
+  by = "USAFID",
+  all.x = TRUE, all.y = FALSE
+)
+```
+
+```{r question 3-plot}
+library(leaflet)
+
+# Combining datasets
+dat1 <- met_location[, .(lon, lat)]
+dat1[, type := "Center of the state"]
+
+dat2 <- met_temp[, .(lon, lat)]
+dat2[, type := "Center of the temperature"]
+
+dat <- rbind(dat1, dat2)
+
+# Copy and paste from previous lab
+rh_pal <- colorFactor(c('blue','red'),
+                      domain = as.factor(dat$type))
+leaflet(dat) %>%
+  addProviderTiles("OpenStreetMap") %>%
+  addCircles(lng = ~lon, lat = ~lat, color = ~rh_pal(type),
+             opacity=1, fillOpacity = 1, radius = 500)
+```
+
+
 
 Knit the doc and save it on GitHub.
 
