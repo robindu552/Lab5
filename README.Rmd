@@ -138,7 +138,7 @@ met_stations <- met[, .(
     temp      = mean(temp, na.rm = TRUE),
     atm.press = mean(atm.press, na.rm = TRUE),
     wind.sp   = mean(wind.sp, na.rm = TRUE)
-  ), by = USAFID]
+  ), by = .(USAFID, STATE)]
 
 # Computing the median
 met_stations[, temp50      := quantile(temp, probs = .5, na.rm = TRUE)]
@@ -157,12 +157,31 @@ met_stations[which.min(abs(wind.sp - wind.sp50))]
 
 Knit the document, commit your changes, and Save it on GitHub. Don't forget to add `README.md` to the tree, the first time you render it.
 
+
 ## Question 2: Representative station per state
 
 Just like the previous question, you are asked to identify what is the most representative, the median, station per state. This time, instead of looking at one variable at a time, look at the euclidean distance. If multiple stations show in the median, select the one located at the lowest latitude.
 
-```{r}
+```{r question2}
+# Computing the median
+met_stations[, temp50s      := quantile(temp, probs = .5, na.rm = TRUE), by = STATE]
+met_stations[, atm.press50s := quantile(atm.press, probs = .5, na.rm = TRUE), by = STATE]
+met_stations[, wind.sp50s   := quantile(wind.sp, probs = .5, na.rm = TRUE), by = STATE]
 
+# Temperature
+met_stations[, tempdif  := which.min(abs(temp - temp50s)), by = STATE]
+met_stations[, recordid := 1:.N, by = STATE]
+met_stations[recordid == tempdif, .(USAFID, temp, temp50s, STATE)]
+
+# Atmospheric pressure
+met_stations[, atm.pressdif  := which.min(abs(atm.press - atm.press50s)), by = STATE]
+met_stations[, recordid := 1:.N, by = STATE]
+met_stations[recordid == atm.pressdif, .(USAFID, atm.press, atm.press50s, STATE)]
+
+# Wind speed
+met_stations[, wind.spdif  := which.min(abs(wind.sp - wind.sp50s)), by = STATE]
+met_stations[, recordid := 1:.N, by = STATE]
+met_stations[recordid == wind.spdif, .(USAFID, wind.sp, wind.sp50s, STATE)]
 ```
 
 Knit the doc and save it on GitHub.
