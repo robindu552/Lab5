@@ -280,4 +280,13 @@ git commit -a -m "Finalizing lab 5 https://github.com/USCbiostats/PM566/issues/2
 ```
 
 
+# Last notes
+
+If you want to render all formats specified at the top of the yaml file, you can do it using the following command:
+
+```r
+rmarkdown::render("README.Rmd", output_format = "all")
+```
+
+
 
