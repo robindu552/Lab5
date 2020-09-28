@@ -85,9 +85,15 @@ Once you are done setting up the project, you can now start working with the MET
 
 1. Load the `data.table` (and the `dtplyr` and `dplyr` packages if you plan to work with those).
 
+```{r met-data}
+library(data.table)
+met <- fread("C:/PM566/Lab5/met_all.gz") 
+```
+
+
 2. Load the met data from https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz, and also the station data. For the later, you can use the code we used during lecture to pre-process the stations data:
 
-```{r stations-data, eval = FALSE}
+```{r stations-data, eval = TRUE, cache = TRUE}
 # Download the data
 stations <- fread("ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-history.csv")
 stations[, USAF := as.integer(USAF)]
@@ -109,6 +115,18 @@ stations <- stations[n == 1,][, n := NULL]
 ```
 
 3. Merge the data as we did during the lecture.
+
+```{r merging}
+met <- merge(
+  x = met, y = stations, 
+  by.x = "USAFID", by.y = "USAF", 
+  all.x = TRUE, all.y = FALSE
+  )
+
+#Print out a sample of the data
+met[1:5, .(USAFID, WBAN, STATE)]
+```
+
 
 ## Question 1: Representative station for the US
 

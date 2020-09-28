@@ -98,6 +98,13 @@ the MET data.
 1.  Load the `data.table` (and the `dtplyr` and `dplyr` packages if you
     plan to work with those).
 
+<!-- end list -->
+
+``` r
+library(data.table)
+met <- fread("C:/PM566/Lab5/met_all.gz") 
+```
+
 2.  Load the met data from
     <https://raw.githubusercontent.com/USCbiostats/data-science-data/master/02_met/met_all.gz>,
     and also the station data. For the later, you can use the code we
@@ -109,7 +116,11 @@ the MET data.
 # Download the data
 stations <- fread("ftp://ftp.ncdc.noaa.gov/pub/data/noaa/isd-history.csv")
 stations[, USAF := as.integer(USAF)]
+```
 
+    ## Warning in eval(jsub, SDenv, parent.frame()): NAs introduced by coercion
+
+``` r
 # Dealing with NAs and 999999
 stations[, USAF   := fifelse(USAF == 999999, NA_integer_, USAF)]
 stations[, CTRY   := fifelse(CTRY == "", NA_character_, CTRY)]
@@ -127,6 +138,20 @@ stations <- stations[n == 1,][, n := NULL]
 ```
 
 3.  Merge the data as we did during the lecture.
+
+<!-- end list -->
+
+``` r
+met <- (merge(x = met, y = stations, by.x = "USAFID", by.y = "USAF", all.x = TRUE, all.y = FALSE))
+met[1:5, .(USAFID, WBAN, STATE)]
+```
+
+    ##    USAFID  WBAN STATE
+    ## 1: 690150 93121    CA
+    ## 2: 690150 93121    CA
+    ## 3: 690150 93121    CA
+    ## 4: 690150 93121    CA
+    ## 5: 690150 93121    CA
 
 ## Question 1: Representative station for the US
 
