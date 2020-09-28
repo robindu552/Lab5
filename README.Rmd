@@ -123,7 +123,7 @@ met <- merge(
   all.x = TRUE, all.y = FALSE
   )
 
-#Print out a sample of the data
+# Print out a sample of the data
 met[1:5, .(USAFID, WBAN, STATE)]
 ```
 
@@ -132,9 +132,27 @@ met[1:5, .(USAFID, WBAN, STATE)]
 
 What is the median station in terms of temperature, wind speed, and atmospheric pressure? Look for the three weather stations that best represent continental US using the `quantile()` function. Do these three coincide?
 
-```{r}
+```{r question1}
+# Obtaining averages per station
+met_stations <- met[, .(
+    temp      = mean(temp, na.rm = TRUE),
+    atm.press = mean(atm.press, na.rm = TRUE),
+    wind.sp   = mean(wind.sp, na.rm = TRUE)
+  ), by = USAFID]
 
+# Computing the median
+met_stations[, temp50      := quantile(temp, probs = .5, na.rm = TRUE)]
+met_stations[, atm.press50 := quantile(atm.press, probs = .5, na.rm = TRUE)]
+met_stations[, wind.sp50   := quantile(wind.sp, probs = .5, na.rm = TRUE)]
+
+# Filtering the data
+met_stations[which.min(abs(temp - temp50))]
+met_stations[which.min(abs(atm.press - atm.press50))]
+met_stations[which.min(abs(wind.sp - wind.sp50))]
 ```
+
+
+- No, these three do not coincide.
 
 
 Knit the document, commit your changes, and Save it on GitHub. Don't forget to add `README.md` to the tree, the first time you render it.

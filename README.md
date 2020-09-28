@@ -142,7 +142,13 @@ stations <- stations[n == 1,][, n := NULL]
 <!-- end list -->
 
 ``` r
-met <- (merge(x = met, y = stations, by.x = "USAFID", by.y = "USAF", all.x = TRUE, all.y = FALSE))
+met <- merge(
+  x = met, y = stations, 
+  by.x = "USAFID", by.y = "USAF", 
+  all.x = TRUE, all.y = FALSE
+  )
+
+# Print out a sample of the data
 met[1:5, .(USAFID, WBAN, STATE)]
 ```
 
@@ -159,6 +165,42 @@ What is the median station in terms of temperature, wind speed, and
 atmospheric pressure? Look for the three weather stations that best
 represent continental US using the `quantile()` function. Do these three
 coincide?
+
+``` r
+# Obtaining averages per station
+met_stations <- met[, .(
+    temp      = mean(temp, na.rm = TRUE),
+    atm.press = mean(atm.press, na.rm = TRUE),
+    wind.sp   = mean(wind.sp, na.rm = TRUE)
+  ), by = USAFID]
+
+# Computing the median
+met_stations[, temp50      := quantile(temp, probs = .5, na.rm = TRUE)]
+met_stations[, atm.press50 := quantile(atm.press, probs = .5, na.rm = TRUE)]
+met_stations[, wind.sp50   := quantile(wind.sp, probs = .5, na.rm = TRUE)]
+
+# Filtering the data
+met_stations[which.min(abs(temp - temp50))]
+```
+
+    ##    USAFID     temp atm.press  wind.sp   temp50 atm.press50 wind.sp50
+    ## 1: 720458 23.68173       NaN 1.209682 23.68406    1014.691  2.461838
+
+``` r
+met_stations[which.min(abs(atm.press - atm.press50))]
+```
+
+    ##    USAFID     temp atm.press  wind.sp   temp50 atm.press50 wind.sp50
+    ## 1: 722238 26.13978  1014.691 1.472656 23.68406    1014.691  2.461838
+
+``` r
+met_stations[which.min(abs(wind.sp - wind.sp50))]
+```
+
+    ##    USAFID     temp atm.press  wind.sp   temp50 atm.press50 wind.sp50
+    ## 1: 720929 17.43278       NaN 2.461838 23.68406    1014.691  2.461838
+
+  - No, these three do not coincide.
 
 Knit the document, commit your changes, and Save it on GitHub. Don’t
 forget to add `README.md` to the tree, the first time you render it.
